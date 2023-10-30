@@ -22,7 +22,7 @@ func main() {
 	bobSecret, msg := interceptmsg(*bobPKey, *alicePKey, *msgc)
 	fmt.Printf("Secret is: %s, Message is: %s\n", bobSecret.Text(10), msg.Text(10))
 
-	modifiedmsgc := msgc.Mul(big.NewInt(3), msgc)
+	modifiedmsgc := msgc.Mul(big.NewInt(2), msgc)
 	bobMsg := elgamelDecrypt(bobSecret, *alicePKey, *modifiedmsgc)
 	fmt.Printf("Tampered message: %s\n", bobMsg.Text(10))
 }

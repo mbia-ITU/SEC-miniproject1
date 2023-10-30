@@ -1,0 +1,134 @@
+\documentclass{article}
+
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
+\usepackage{thmtools}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{framed}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\colorlet{LightGray}{White!90!Periwinkle}
+\colorlet{LightOrange}{Orange!15}
+\colorlet{LightGreen}{Green!15}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+
+\declaretheoremstyle[name=Theorem,]{thmsty}
+\declaretheorem[style=thmsty,numberwithin=section]{theorem}
+\tcolorboxenvironment{theorem}{colback=LightGray}
+
+\declaretheoremstyle[name=Proposition,]{prosty}
+\declaretheorem[style=prosty,numberlike=theorem]{proposition}
+\tcolorboxenvironment{proposition}{colback=LightOrange}
+
+\declaretheoremstyle[name=Principle,]{prcpsty}
+\declaretheorem[style=prcpsty,numberlike=theorem]{principle}
+\tcolorboxenvironment{principle}{colback=LightGreen}
+
+\setstretch{1.2}
+\geometry{
+    textheight=9in,
+    textwidth=5.5in,
+    top=1in,
+    headheight=12pt,
+    headsep=25pt,
+    footskip=30pt
+}
+
+% ------------------------------------------------------------------------------
+
+\begin{document}
+
+% ------------------------------------------------------------------------------
+% Cover Page and ToC
+% ------------------------------------------------------------------------------
+
+\title{ \normalsize \textsc{}
+		\\ [2.0cm]
+		\HRule{1.5pt} \\
+		\LARGE \textbf{\uppercase{miniproject1}
+		\HRule{2.0pt} \\ [0.6cm] \LARGE{IT-University of Copenhagen} \vspace*{10\baselineskip}}
+		}
+\date{}
+\author{\textbf{Mikkel Bistrup Andersen} \\ 
+		26. october 2023 \\
+		Copenhagen \\}
+
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+% ------------------------------------------------------------------------------
+
+\subsection{Assignment 1}
+In question 1 we are asked to send an encrypted message. We are given a public key to start with, so we will have to generate the shared key. This is done with the following code:
+\begin{lstlisting}
+func findKey(base, prime, s big.Int) *big.Int {
+
+	result := big.NewInt(0)
+	result.Exp(&base, &s, nil)
+	result.Mod(result, &prime)
+	return result
+}
+\end{lstlisting}
+The output can then we factored with the message for final encryption.
+
+\subsection{Assignment 2}
+Question 2 asks us to intercept and decrypt the message sent in question 1. To do this we can use the following code to decrypt the encrypted message:
+
+\begin{lstlisting}
+    func elgamelDecrypt(smsg, pKey, c big.Int) big.Int {
+	sKey := findKey(pKey, *big.NewInt(Prime), smsg)
+	result := big.NewInt(0)
+	return *result.Div(&c, sKey)
+}
+\end{lstlisting}
+
+We can then intercept the message by brute forcing until we have the secret. When we have it, we simply call our decrypting method:
+
+\begin{lstlisting}
+    func interceptmsg(target, pKey, c big.Int) (s, msg big.Int) {
+	base := big.NewInt(Base)
+	prime := big.NewInt(Prime)
+	i := big.NewInt(1)
+	var limiter big.Int = *big.NewInt(1000)
+
+	for k := *big.NewInt(1); k.Cmp(&limiter) < 0; k.Add(&k, i) {
+		key := findKey(*base, *prime, k)
+
+		if key.Cmp(&target) == 0 {
+			msg := elgamelDecrypt(k, pKey, c)
+			return k, msg
+		}
+	}
+	return *big.NewInt(0), *big.NewInt(0)
+}
+\end{lstlisting}
+
+\subsection{Assignment 3}
+Question 3 simply asks us to change the message we intercepted earlier from 2000 to 4000. This can be done quite simply by factoring the message by 2, since we know the message contents to be 2000. Then the message becomes 4000.
+
+\subsection{Output}
+\begin{lstlisting}
+    $ Public key: 1, Message: 2000
+    $ Secret is: 66, Message is: 2000
+    $ Tampered message: 4000
+\end{lstlisting}
+
+% ------------------------------------------------------------------------------
+% Reference and Cited Works
+% ------------------------------------------------------------------------------
+
+% ------------------------------------------------------------------------------
+
+\end{document}
